@@ -75,13 +75,17 @@ def tree_terminals(tree):
     ret = []
     def helper(t):
         if isinstance(t,TerminalNode):
-            ret.append(t.getText())
+            ret.append(t)
         else:
             for c in t.getChildren():
                 helper(c)
 
     helper(tree)
     return ret
+
+def str_terminal(x):
+    return str(x.symbol)
+
 
 def src_contents(contents):
     
@@ -98,6 +102,7 @@ def main():
     parser.add_argument("--prettyrule",action="store_true")
     parser.add_argument("--printdata",action="store_true")
     parser.add_argument("--printstatement",action="store_true")
+    parser.add_argument("--printterminals",action="store_true")
     parser.add_argument("--printxpath")
 
     args = parser.parse_args()
@@ -126,11 +131,15 @@ def main():
         if args.printdata:
             print_proc("//dataDescriptionEntry")
 
-        if args.printdata:
+        if args.printstatement:
             print_proc("//statement")
 
         if args.printxpath:
             print_proc(args.printxpath)
+
+        if args.printterminals:
+            for x in tree_terminals(tree):
+                print(str_terminal(x))
             
         if args.visitor:
             output = visitor.visit(tree)
