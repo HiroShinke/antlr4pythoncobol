@@ -104,6 +104,11 @@ def create_cobol_parser(contents):
 
     return parser
 
+def cobol_parser_from_file(f):
+
+    with open(f) as fh:
+        return create_cobol_parser(fh.read())
+
 
 def main():
 
@@ -119,38 +124,35 @@ def main():
 
     args = parser.parse_args()
 
-    with open(args.src) as fh:
+    parser = cobol_parser_from_file(args.src)
+    tree = parser.startRule()
+    print(f"tree = {tree}")
+    visitor = SampleVisitor()
+    
+    def print_proc(xpath):
+        subtrees = XPath.findAll(tree,xpath,parser)
+        for x in subtrees:
+            if args.prettyrule:
+                print(tree_pretty(x,parser))
+            else:
+                print(tree_text(x,parser if args.withrule else None))
+                
+    if args.printdata:
+        print_proc("//dataDescriptionEntry")
+                    
+    if args.printstatement:
+        print_proc("//statement")
+    
+    if args.printxpath:
+        print_proc(args.printxpath)
 
-        parser = create_cobol_parser(fh.read())
-
-        tree = parser.startRule()
-        print(f"tree = {tree}")
-        visitor = SampleVisitor()
-        
-        def print_proc(xpath):
-            subtrees = XPath.findAll(tree,xpath,parser)
-            for x in subtrees:
-                if args.prettyrule:
-                    print(tree_pretty(x,parser))
-                else:
-                    print(tree_text(x,parser if args.withrule else None))
-
-        if args.printdata:
-            print_proc("//dataDescriptionEntry")
-
-        if args.printstatement:
-            print_proc("//statement")
-
-        if args.printxpath:
-            print_proc(args.printxpath)
-
-        if args.printterminals:
-            for x in tree_terminals(tree):
-                print(str_terminal(x))
+    if args.printterminals:
+        for x in tree_terminals(tree):
+            print(str_terminal(x))
             
-        if args.visitor:
-            output = visitor.visit(tree)
-            print(output)
+    if args.visitor:
+        output = visitor.visit(tree)
+        print(output)
 
 if __name__ == "__main__":
     main()
