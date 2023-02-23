@@ -128,8 +128,8 @@ def main():
         visitor = SampleVisitor()
         
         def print_proc(xpath):
-            xxxx = XPath.findAll(tree,xpath,parser)
-            for x in xxxx:
+            subtrees = XPath.findAll(tree,xpath,parser)
+            for x in subtrees:
                 if args.prettyrule:
                     print(tree_pretty(x,parser))
                 else:
