@@ -93,6 +93,18 @@ def src_contents(contents):
     ret = [ l[6:72] + "\n" for l in lines if not re.search(r"^.{6}\*",l) ]
     return "".join(ret)
 
+
+def create_cobol_parser(contents):
+
+    contents = src_contents(contents)
+    data =  InputStream(contents)
+    lexer = Cobol85Lexer(data)
+    stream = CommonTokenStream(lexer)
+    parser = Cobol85Parser(stream)
+
+    return parser
+
+
 def main():
 
     parser = argparse.ArgumentParser()
@@ -109,17 +121,12 @@ def main():
 
     with open(args.src) as fh:
 
-        contents = src_contents(fh.read())
-    
-        visitor = SampleVisitor()
-        data =  InputStream(contents)
-        lexer = Cobol85Lexer(data)
-        stream = CommonTokenStream(lexer)
-        
-        parser = Cobol85Parser(stream)
+        parser = create_cobol_parser(fh.read())
+
         tree = parser.startRule()
         print(f"tree = {tree}")
-
+        visitor = SampleVisitor()
+        
         def print_proc(xpath):
             xxxx = XPath.findAll(tree,xpath,parser)
             for x in xxxx:
