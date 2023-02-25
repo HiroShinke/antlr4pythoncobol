@@ -27,7 +27,10 @@ def tree_text(tree,parser=None):
 
     def helper(t):
         if isinstance(t,TerminalNode):
-            buff.append(t.getText())
+            str_ = t.getText()
+            if parser:
+                str_ += "<" +  parser.symbolicNames[t.symbol.type] + ">"
+            buff.append(str_)
         else:
             if parser:
                 idx = t.getRuleIndex()                
@@ -83,9 +86,14 @@ def tree_terminals(tree):
     helper(tree)
     return ret
 
-def str_terminal(x):
-    return str(x.symbol)
-
+def str_terminal(x,parser=None):
+    if parser:
+        return ( str(x.symbol) +
+                 "<" +
+                 parser.symbolicNames[x.symbol.type] +
+                 ">" )
+    else:
+        return str(x.symbol)
 
 def src_contents(contents):
     
@@ -94,7 +102,7 @@ def src_contents(contents):
     return "".join(ret)
 
 
-def create_cobol_parser(contents):
+def create_parser(contents):
 
     contents = src_contents(contents)
     data =  InputStream(contents)
@@ -104,10 +112,10 @@ def create_cobol_parser(contents):
 
     return parser
 
-def cobol_parser_from_file(f):
+def parser_from_file(f):
 
     with open(f) as fh:
-        return create_cobol_parser(fh.read())
+        return create_parser(fh.read())
 
 
 def main():
@@ -124,7 +132,7 @@ def main():
 
     args = parser.parse_args()
 
-    parser = cobol_parser_from_file(args.src)
+    parser = parser_from_file(args.src)
     tree = parser.startRule()
     print(f"tree = {tree}")
     visitor = SampleVisitor()
@@ -148,8 +156,8 @@ def main():
 
     if args.printterminals:
         for x in tree_terminals(tree):
-            print(str_terminal(x))
-            
+            print(str_terminal(x,parser))
+
     if args.visitor:
         output = visitor.visit(tree)
         print(output)
